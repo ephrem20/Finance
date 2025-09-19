@@ -6,36 +6,65 @@ import { TransactionType } from '../types';
 
 interface SpendingTrendChartProps {
   data: Transaction[];
+  view: 'monthly' | 'quarterly' | 'yearly';
 }
 
-const SpendingTrendChart: React.FC<SpendingTrendChartProps> = ({ data }) => {
+const SpendingTrendChart: React.FC<SpendingTrendChartProps> = ({ data, view }) => {
   const chartData = useMemo(() => {
-    const monthlyTotals: { [key: string]: { revenue: number, expenses: number } } = {};
+    const totals: { [key: string]: { revenue: number, expenses: number } } = {};
     
+    const getMonthKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    const getQuarterKey = (d: Date) => `${d.getFullYear()}-Q${Math.floor(d.getMonth() / 3) + 1}`;
+    const getYearKey = (d: Date) => d.getFullYear().toString();
+
     data.forEach(transaction => {
       const date = new Date(transaction.date);
-      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      let key: string;
+
+      switch(view) {
+        case 'yearly':
+          key = getYearKey(date);
+          break;
+        case 'quarterly':
+          key = getQuarterKey(date);
+          break;
+        case 'monthly':
+        default:
+          key = getMonthKey(date);
+          break;
+      }
       
-      if (!monthlyTotals[monthKey]) {
-        monthlyTotals[monthKey] = { revenue: 0, expenses: 0 };
+      if (!totals[key]) {
+        totals[key] = { revenue: 0, expenses: 0 };
       }
       
       if (transaction.type === TransactionType.REVENUE) {
-        monthlyTotals[monthKey].revenue += transaction.amount;
+        totals[key].revenue += transaction.amount;
       } else {
-        monthlyTotals[monthKey].expenses += transaction.amount;
+        totals[key].expenses += transaction.amount;
       }
     });
 
-    return Object.keys(monthlyTotals)
+    return Object.keys(totals)
       .sort()
-      .slice(-6) // Show last 6 months
-      .map(key => ({
-        name: new Date(key + '-02').toLocaleString('default', { month: 'short', year: '2-digit' }),
-        Revenue: monthlyTotals[key].revenue,
-        Expenses: monthlyTotals[key].expenses,
-      }));
-  }, [data]);
+      .slice(-6) // Show last 6 periods
+      .map(key => {
+        let name: string;
+        if (view === 'monthly') {
+           name = new Date(key + '-02').toLocaleString('default', { month: 'short', year: '2-digit' });
+        } else if (view === 'quarterly') {
+          const [year, quarter] = key.split('-');
+          name = `${quarter} '${year.slice(2)}`;
+        } else { // yearly
+          name = key;
+        }
+        return {
+          name,
+          Revenue: totals[key].revenue,
+          Expenses: totals[key].expenses,
+        }
+      });
+  }, [data, view]);
 
   if (chartData.length === 0) {
     return <div className="flex items-center justify-center h-full text-gray-500">Not enough data for trend analysis.</div>;
