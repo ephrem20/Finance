@@ -48,7 +48,7 @@ const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit 
   const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   
   if (transactions.length === 0) {
-    return <p className="text-center text-gray-500">No transactions for this month.</p>;
+    return <p className="text-center text-gray-500">No transactions for this period.</p>;
   }
 
   return (
