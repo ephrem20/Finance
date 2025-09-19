@@ -1,0 +1,5 @@
+{
+  "name": "Wallet Watcher",
+  "description": "A secure, single-user web application for tracking and analyzing personal monthly revenue and expenses. The app provides insightful, visual reports to help users understand their spending habits and manage their finances more effectively.",
+  "requestFramePermissions": []
+}
