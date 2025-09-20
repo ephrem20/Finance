@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const { login, signup } = useAuth();
@@ -11,15 +11,15 @@ const LoginPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!username) {
-      setError('Username is required.');
+    if (!username || !password) {
+      setError('Username and password are required.');
       return;
     }
     try {
       if (isLogin) {
-        login(username);
+        login(username, password);
       } else {
-        signup(username);
+        signup(username, password);
       }
     } catch (err) {
       if (err instanceof Error) {
@@ -40,7 +40,7 @@ const LoginPage: React.FC = () => {
           <p className="mt-2 text-sm text-gray-400">Welcome to Wallet Watcher</p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+          <div className="rounded-md shadow-sm space-y-4">
             <div>
               <label htmlFor="username" className="sr-only">Username</label>
               <input
@@ -55,7 +55,25 @@ const LoginPage: React.FC = () => {
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
-            <p className="text-xs text-gray-500 pt-2 px-1">Note: No password needed for this demo. Username is your key.</p>
+            <div>
+              <label htmlFor="password-input" className="sr-only">Password</label>
+              <input
+                id="password-input"
+                name="password"
+                type="password"
+                autoComplete={isLogin ? "current-password" : "new-password"}
+                required
+                className="appearance-none rounded-md relative block w-full px-3 py-3 border border-gray-700 bg-gray-900 text-white placeholder-gray-500 focus:outline-none focus:ring-brand-primary focus:border-brand-primary sm:text-sm"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+            <div className="bg-yellow-900 border-l-4 border-yellow-500 text-yellow-100 p-2" role="alert">
+              <p className="text-xs">
+                <strong>Security Notice:</strong> This is a demo application. For your safety, do not use a real password. All data is stored locally in your browser and is not secure.
+              </p>
+            </div>
           </div>
 
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
@@ -70,7 +88,7 @@ const LoginPage: React.FC = () => {
           </div>
         </form>
         <div className="text-sm text-center">
-          <button onClick={() => setIsLogin(!isLogin)} className="font-medium text-brand-primary hover:text-brand-secondary">
+          <button onClick={() => { setIsLogin(!isLogin); setError(''); }} className="font-medium text-brand-primary hover:text-brand-secondary">
             {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
           </button>
         </div>
