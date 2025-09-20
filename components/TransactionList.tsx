@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { Transaction } from '../types';
 import { TransactionType } from '../types';
@@ -20,7 +19,7 @@ const TransactionItem: React.FC<{ transaction: Transaction, onEdit: (transaction
       <div className="flex items-center gap-4">
         <div>
           <p className="font-semibold text-white">{transaction.description}</p>
-          <p className="text-sm text-gray-400">{transaction.category}</p>
+          <p className="text-sm text-gray-400">{transaction.category} - {new Date(transaction.date).toLocaleDateString()}</p>
         </div>
       </div>
       <div className="flex items-center gap-4">
@@ -45,15 +44,13 @@ const TransactionItem: React.FC<{ transaction: Transaction, onEdit: (transaction
 
 
 const TransactionList: React.FC<TransactionListProps> = ({ transactions, onEdit }) => {
-  const sortedTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
   if (transactions.length === 0) {
-    return <p className="text-center text-gray-500">No transactions for this period.</p>;
+    return <p className="text-center text-gray-500 py-8">No transactions match the current filters.</p>;
   }
 
   return (
-    <div className="space-y-2 max-h-96 overflow-y-auto">
-      {sortedTransactions.map(transaction => (
+    <div className="space-y-2 max-h-[30rem] overflow-y-auto pr-2">
+      {transactions.map(transaction => (
         <TransactionItem key={transaction.id} transaction={transaction} onEdit={onEdit} />
       ))}
     </div>
