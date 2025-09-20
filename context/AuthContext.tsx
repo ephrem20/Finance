@@ -7,6 +7,7 @@ interface AuthContextType {
   signup: (username: string, password?: string) => void;
   logout: () => void;
   updateUserCredentials: (currentUsername: string, currentPassword: string, newUsername?: string, newPassword?: string) => void;
+  deleteUserAccount: (username: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,6 +54,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('wallet_watcher_user');
     setUser(null);
   };
+  
+  const deleteUserAccount = (username: string) => {
+    const users = JSON.parse(localStorage.getItem('wallet_watcher_users') || '[]') as Array<{username: string, password: string}>;
+    
+    const userExists = users.some(u => u.username === username);
+    if (!userExists) {
+        throw new Error("Username not found.");
+    }
+
+    const updatedUsers = users.filter(u => u.username !== username);
+    localStorage.setItem('wallet_watcher_users', JSON.stringify(updatedUsers));
+    
+    // Also delete their transactions
+    const transactionsKey = `wallet_watcher_transactions_${username}`;
+    localStorage.removeItem(transactionsKey);
+
+    // If they are somehow logged in while doing this, log them out.
+    if (user?.username === username) {
+        logout();
+    }
+  };
+
 
   const updateUserCredentials = (currentUsername: string, currentPassword: string, newUsername?: string, newPassword?: string) => {
     const users = JSON.parse(localStorage.getItem('wallet_watcher_users') || '[]') as Array<{username: string, password: string}>;
@@ -95,7 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, updateUserCredentials }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, updateUserCredentials, deleteUserAccount }}>
       {children}
     </AuthContext.Provider>
   );
