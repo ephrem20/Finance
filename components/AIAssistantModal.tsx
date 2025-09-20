@@ -1,5 +1,5 @@
 import React, { useState, FormEvent, useRef, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI } from "https://aistudiocdn.com/@google/genai@^0.16.0/dist/index.mjs";
 import type { Transaction, ChatMessage } from '../types';
 import { MessageAuthor } from '../types';
 
