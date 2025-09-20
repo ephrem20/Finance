@@ -1,4 +1,3 @@
-
 export enum TransactionType {
   REVENUE = 'REVENUE',
   EXPENSE = 'EXPENSE',
@@ -16,4 +15,14 @@ export interface Transaction {
 
 export interface User {
   username: string;
+}
+
+export enum MessageAuthor {
+  USER = 'USER',
+  AI = 'AI',
+}
+
+export interface ChatMessage {
+    author: MessageAuthor;
+    text: string;
 }
