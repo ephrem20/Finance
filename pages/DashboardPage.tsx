@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import Header from '../components/Header';
 import PeriodSelector from '../components/PeriodSelector';
@@ -7,6 +6,7 @@ import ExpensePieChart from '../components/ExpensePieChart';
 import SpendingTrendChart from '../components/SpendingTrendChart';
 import TransactionList from '../components/TransactionList';
 import TransactionModal from '../components/TransactionModal';
+import AccountModal from '../components/AccountModal'; // Import new modal
 import { useTransactions } from '../context/TransactionContext';
 import type { Transaction } from '../types';
 import { TransactionType } from '../types';
@@ -14,7 +14,8 @@ import { TransactionType } from '../types';
 const DashboardPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false); // State for new modal
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { transactions, loading } = useTransactions();
 
@@ -55,22 +56,26 @@ const DashboardPage: React.FC = () => {
 
   const handleEdit = (transaction: Transaction) => {
     setEditingTransaction(transaction);
-    setIsModalOpen(true);
+    setIsTransactionModalOpen(true);
   };
   
   const handleAddNew = () => {
     setEditingTransaction(null);
-    setIsModalOpen(true);
+    setIsTransactionModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
+  const handleCloseTransactionModal = () => {
+    setIsTransactionModalOpen(false);
     setEditingTransaction(null);
   };
+  
+  const handleOpenAccountModal = () => setIsAccountModalOpen(true);
+  const handleCloseAccountModal = () => setIsAccountModalOpen(false);
+
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200">
-      <Header />
+      <Header onOpenAccountModal={handleOpenAccountModal} />
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <PeriodSelector 
@@ -113,7 +118,8 @@ const DashboardPage: React.FC = () => {
           </>
         )}
       </main>
-      <TransactionModal isOpen={isModalOpen} onClose={handleCloseModal} transaction={editingTransaction} />
+      <TransactionModal isOpen={isTransactionModalOpen} onClose={handleCloseTransactionModal} transaction={editingTransaction} />
+      <AccountModal isOpen={isAccountModalOpen} onClose={handleCloseAccountModal} />
     </div>
   );
 };
