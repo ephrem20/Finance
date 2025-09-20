@@ -6,6 +6,7 @@ interface AuthContextType {
   login: (username: string, password?: string) => void;
   signup: (username: string, password?: string) => void;
   logout: () => void;
+  updateUserCredentials: (currentUsername: string, currentPassword: string, newUsername?: string, newPassword?: string) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -53,8 +54,48 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
+  const updateUserCredentials = (currentUsername: string, currentPassword: string, newUsername?: string, newPassword?: string) => {
+    const users = JSON.parse(localStorage.getItem('wallet_watcher_users') || '[]') as Array<{username: string, password: string}>;
+    const userIndex = users.findIndex(u => u.username === currentUsername);
+
+    if (userIndex === -1) {
+        throw new Error("User not found.");
+    }
+
+    const userToUpdate = users[userIndex];
+
+    if (userToUpdate.password !== currentPassword) {
+        throw new Error("Incorrect current password.");
+    }
+    
+    const finalNewUsername = newUsername && newUsername.trim() !== '' && newUsername.trim() !== currentUsername ? newUsername.trim() : currentUsername;
+    const finalNewPassword = newPassword && newPassword.trim() !== '' ? newPassword.trim() : currentPassword;
+
+    if (finalNewUsername !== currentUsername && users.some(u => u.username === finalNewUsername)) {
+        throw new Error("New username is already taken.");
+    }
+    
+    users[userIndex] = { username: finalNewUsername, password: finalNewPassword };
+    localStorage.setItem('wallet_watcher_users', JSON.stringify(users));
+
+    if (finalNewUsername !== currentUsername) {
+        const oldTransactionsKey = `wallet_watcher_transactions_${currentUsername}`;
+        const newTransactionsKey = `wallet_watcher_transactions_${finalNewUsername}`;
+        const transactionsData = localStorage.getItem(oldTransactionsKey);
+        
+        if (transactionsData) {
+            localStorage.setItem(newTransactionsKey, transactionsData);
+            localStorage.removeItem(oldTransactionsKey);
+        }
+    }
+    
+    const updatedUserSession = { username: finalNewUsername };
+    localStorage.setItem('wallet_watcher_user', JSON.stringify(updatedUserSession));
+    setUser(updatedUserSession);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, login, signup, logout, updateUserCredentials }}>
       {children}
     </AuthContext.Provider>
   );
