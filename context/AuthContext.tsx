@@ -1,11 +1,10 @@
-
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import type { User } from '../types';
 
 interface AuthContextType {
   user: User | null;
-  login: (username: string) => void;
-  signup: (username: string) => void;
+  login: (username: string, password?: string) => void;
+  signup: (username: string, password?: string) => void;
   logout: () => void;
 }
 
@@ -21,23 +20,28 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, []);
 
-  const login = (username: string) => {
+  const login = (username: string, password?: string) => {
     const users = JSON.parse(localStorage.getItem('wallet_watcher_users') || '[]');
-    if (users.includes(username)) {
+    const existingUser = users.find((u: any) => u.username === username);
+
+    if (existingUser && existingUser.password === password) {
       const loggedInUser = { username };
       localStorage.setItem('wallet_watcher_user', JSON.stringify(loggedInUser));
       setUser(loggedInUser);
     } else {
-      throw new Error('User not found');
+      throw new Error('Invalid username or password');
     }
   };
 
-  const signup = (username: string) => {
+  const signup = (username: string, password?: string) => {
+    if (!password) {
+      throw new Error('Password is required for signup.');
+    }
     const users = JSON.parse(localStorage.getItem('wallet_watcher_users') || '[]');
-    if (users.includes(username)) {
+    if (users.some((u: any) => u.username === username)) {
       throw new Error('Username already exists');
     }
-    users.push(username);
+    users.push({ username, password });
     localStorage.setItem('wallet_watcher_users', JSON.stringify(users));
     const newUser = { username };
     localStorage.setItem('wallet_watcher_user', JSON.stringify(newUser));
