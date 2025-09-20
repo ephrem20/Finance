@@ -2,6 +2,7 @@
 import React from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { TransactionProvider } from './context/TransactionContext';
+import { GoalProvider } from './context/GoalContext';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 
@@ -18,7 +19,9 @@ const Main: React.FC = () => {
 
   return user ? (
     <TransactionProvider>
-      <DashboardPage />
+      <GoalProvider>
+        <DashboardPage />
+      </GoalProvider>
     </TransactionProvider>
   ) : (
     <LoginPage />
