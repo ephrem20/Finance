@@ -6,7 +6,8 @@ import ExpensePieChart from '../components/ExpensePieChart';
 import SpendingTrendChart from '../components/SpendingTrendChart';
 import TransactionList from '../components/TransactionList';
 import TransactionModal from '../components/TransactionModal';
-import AccountModal from '../components/AccountModal'; // Import new modal
+import AccountModal from '../components/AccountModal';
+import AIAssistantModal from '../components/AIAssistantModal'; // Import AI Modal
 import { useTransactions } from '../context/TransactionContext';
 import type { Transaction } from '../types';
 import { TransactionType } from '../types';
@@ -15,7 +16,8 @@ const DashboardPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [view, setView] = useState<'monthly' | 'quarterly' | 'yearly'>('monthly');
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
-  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false); // State for new modal
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false); // State for AI Modal
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const { transactions, loading } = useTransactions();
 
@@ -71,6 +73,9 @@ const DashboardPage: React.FC = () => {
   
   const handleOpenAccountModal = () => setIsAccountModalOpen(true);
   const handleCloseAccountModal = () => setIsAccountModalOpen(false);
+  
+  const handleOpenAIModal = () => setIsAIModalOpen(true);
+  const handleCloseAIModal = () => setIsAIModalOpen(false);
 
 
   return (
@@ -84,12 +89,21 @@ const DashboardPage: React.FC = () => {
             view={view}
             onViewChange={setView}
           />
-           <button
-            onClick={handleAddNew}
-            className="w-full sm:w-auto px-4 py-2 bg-brand-primary text-white font-semibold rounded-lg shadow-md hover:bg-brand-secondary focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:ring-opacity-75 transition-colors duration-300"
-          >
-            + Add Transaction
-          </button>
+          <div className="flex gap-2 w-full sm:w-auto">
+             <button
+                onClick={handleOpenAIModal}
+                className="w-full sm:w-auto px-4 py-2 bg-brand-secondary text-white font-semibold rounded-lg shadow-md hover:bg-purple-500 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-75 transition-colors duration-300 flex items-center gap-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 4a1 1 0 00-2 0v7.268a2 2 0 000 3.464V16a1 1 0 102 0v-1.268a2 2 0 000-3.464V4zM11 4a1 1 0 10-2 0v1.268a2 2 0 000 3.464V16a1 1 0 102 0V8.732a2 2 0 000-3.464V4zM16 3a1 1 0 011 1v7.268a2 2 0 010 3.464V16a1 1 0 11-2 0v-1.268a2 2 0 010-3.464V4a1 1 0 011-1z" /></svg>
+                Ask AI
+              </button>
+             <button
+                onClick={handleAddNew}
+                className="w-full sm:w-auto px-4 py-2 bg-brand-primary text-white font-semibold rounded-lg shadow-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-opacity-75 transition-colors duration-300"
+              >
+                + Add Transaction
+              </button>
+          </div>
         </div>
 
         {loading ? <p className="text-center">Loading data...</p> : (
@@ -120,6 +134,7 @@ const DashboardPage: React.FC = () => {
       </main>
       <TransactionModal isOpen={isTransactionModalOpen} onClose={handleCloseTransactionModal} transaction={editingTransaction} />
       <AccountModal isOpen={isAccountModalOpen} onClose={handleCloseAccountModal} />
+      <AIAssistantModal isOpen={isAIModalOpen} onClose={handleCloseAIModal} transactions={periodTransactions} />
     </div>
   );
 };
