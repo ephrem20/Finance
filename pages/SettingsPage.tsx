@@ -36,13 +36,13 @@ const SettingsPage: React.FC = () => {
                 <p className="text-gray-400 mb-4 text-sm">Set a monthly spending limit to get warnings on your dashboard when you get close.</p>
                 <form onSubmit={handleLimitSave} className="flex flex-col sm:flex-row items-end gap-4">
                     <div className="flex-grow w-full">
-                        <label htmlFor="spending-limit" className="block text-sm font-medium text-gray-300 mb-1">Limit Amount ($)</label>
+                        <label htmlFor="spending-limit" className="block text-sm font-medium text-gray-300 mb-1">Limit Amount (ETB)</label>
                         <input
                             id="spending-limit"
                             type="number"
                             value={limitInput}
                             onChange={e => setLimitInput(e.target.value)}
-                            placeholder="e.g., 5000"
+                            placeholder="e.g., 100000"
                             className="w-full bg-gray-700 text-white rounded-md p-2 border border-gray-600 focus:ring-brand-primary focus:border-brand-primary"
                         />
                     </div>
@@ -64,7 +64,7 @@ const SettingsPage: React.FC = () => {
                             type="text"
                             value={newCategory}
                             onChange={e => setNewCategory(e.target.value)}
-                            placeholder="e.g., Pet Food"
+                            placeholder="e.g., Fuel"
                             className="w-full bg-gray-700 text-white rounded-md p-2 border border-gray-600 focus:ring-brand-primary focus:border-brand-primary"
                         />
                     </div>
