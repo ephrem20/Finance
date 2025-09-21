@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import Header from '../components/Header';
 import MonthSelector from '../components/MonthSelector';
@@ -9,16 +10,18 @@ import TransactionModal from '../components/TransactionModal';
 import GoalList from '../components/GoalList';
 import GoalModal from '../components/GoalModal';
 import FinancialReview from '../components/FinancialReview';
-import ReportsPage from './ReportsPage'; // New Reports Page
+import ReportsPage from './ReportsPage';
+import SettingsPage from './SettingsPage'; // New Settings Page
 import { useTransactions } from '../context/TransactionContext';
 import { useGoals } from '../context/GoalContext';
+import { useSettings } from '../context/SettingsContext';
 import type { Transaction, FinancialGoal } from '../types';
 import { TransactionType } from '../types';
 import { EXPENSE_CATEGORIES } from '../constants';
 
 const DashboardPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'dashboard' | 'review' | 'reports'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'review' | 'reports' | 'settings'>('dashboard');
 
   // State for transaction modal
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -30,6 +33,11 @@ const DashboardPage: React.FC = () => {
 
   const { transactions, loading: transactionsLoading } = useTransactions();
   const { loading: goalsLoading } = useGoals();
+  const { monthlyLimit, customCategories, loading: settingsLoading } = useSettings();
+
+  const allCategories = useMemo(() => {
+    return [...new Set([...EXPENSE_CATEGORIES, ...customCategories])].sort();
+  }, [customCategories]);
 
   // State for filtering and sorting
   const [filterType, setFilterType] = useState('ALL');
@@ -142,7 +150,7 @@ const DashboardPage: React.FC = () => {
     setSortConfig({ key, direction });
   };
 
-  const loading = transactionsLoading || goalsLoading;
+  const loading = transactionsLoading || goalsLoading || settingsLoading;
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200">
@@ -150,7 +158,7 @@ const DashboardPage: React.FC = () => {
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <h2 className="text-3xl font-bold text-white">
-            {view === 'dashboard' ? 'Monthly Dashboard' : view === 'review' ? 'Financial Review' : 'Custom Reports'}
+            {view === 'dashboard' ? 'Monthly Dashboard' : view === 'review' ? 'Financial Review' : view === 'reports' ? 'Custom Reports' : 'Settings'}
           </h2>
            <button
             onClick={handleAddNewTransaction}
@@ -161,10 +169,11 @@ const DashboardPage: React.FC = () => {
         </div>
         
         <div className="flex justify-center mb-6">
-          <div className="bg-gray-800 p-1 rounded-lg flex space-x-1">
+          <div className="bg-gray-800 p-1 rounded-lg flex space-x-1 flex-wrap justify-center">
             <button onClick={() => setView('dashboard')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'dashboard' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Dashboard</button>
             <button onClick={() => setView('review')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'review' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Review</button>
             <button onClick={() => setView('reports')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'reports' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Reports</button>
+            <button onClick={() => setView('settings')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'settings' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Settings</button>
           </div>
         </div>
 
@@ -175,7 +184,7 @@ const DashboardPage: React.FC = () => {
                 <div className="mb-6"><MonthSelector currentDate={currentDate} onDateChange={setCurrentDate} /></div>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                   <SummaryCard title="Total Revenue" amount={totalRevenue} color="text-green-400" />
-                  <SummaryCard title="Total Expenses" amount={totalExpenses} color="text-red-400" />
+                  <SummaryCard title="Total Expenses" amount={totalExpenses} color="text-red-400" limit={monthlyLimit} />
                   <SummaryCard title="Net Savings" amount={netSavings} color={netSavings >= 0 ? 'text-blue-400' : 'text-yellow-400'} />
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-6">
@@ -214,7 +223,7 @@ const DashboardPage: React.FC = () => {
                            <label className="text-xs font-semibold text-gray-400">Category</label>
                            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} disabled={filterType !== TransactionType.EXPENSE} className="w-full bg-gray-800 text-white text-sm rounded-md p-2 border border-gray-600 focus:ring-brand-primary focus:border-brand-primary disabled:opacity-50">
                               <option value="ALL">All</option>
-                              {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                              {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
                            </select>
                         </div>
                          <div>
@@ -245,8 +254,10 @@ const DashboardPage: React.FC = () => {
               </>
             ) : view === 'review' ? (
               <FinancialReview />
-            ) : (
+            ) : view === 'reports' ? (
               <ReportsPage />
+            ) : (
+              <SettingsPage />
             )}
           </>
         )}
