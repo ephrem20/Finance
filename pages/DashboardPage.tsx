@@ -9,6 +9,7 @@ import TransactionModal from '../components/TransactionModal';
 import GoalList from '../components/GoalList';
 import GoalModal from '../components/GoalModal';
 import FinancialReview from '../components/FinancialReview';
+import ReportsPage from './ReportsPage'; // New Reports Page
 import { useTransactions } from '../context/TransactionContext';
 import { useGoals } from '../context/GoalContext';
 import type { Transaction, FinancialGoal } from '../types';
@@ -17,7 +18,7 @@ import { EXPENSE_CATEGORIES } from '../constants';
 
 const DashboardPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<'dashboard' | 'review'>('dashboard');
+  const [view, setView] = useState<'dashboard' | 'review' | 'reports'>('dashboard');
 
   // State for transaction modal
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
@@ -149,7 +150,7 @@ const DashboardPage: React.FC = () => {
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <h2 className="text-3xl font-bold text-white">
-            {view === 'dashboard' ? 'Monthly Dashboard' : 'Financial Review'}
+            {view === 'dashboard' ? 'Monthly Dashboard' : view === 'review' ? 'Financial Review' : 'Custom Reports'}
           </h2>
            <button
             onClick={handleAddNewTransaction}
@@ -163,6 +164,7 @@ const DashboardPage: React.FC = () => {
           <div className="bg-gray-800 p-1 rounded-lg flex space-x-1">
             <button onClick={() => setView('dashboard')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'dashboard' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Dashboard</button>
             <button onClick={() => setView('review')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'review' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Review</button>
+            <button onClick={() => setView('reports')} className={`px-6 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'reports' ? 'bg-brand-primary text-white' : 'text-gray-300 hover:bg-gray-700'}`}>Reports</button>
           </div>
         </div>
 
@@ -241,8 +243,10 @@ const DashboardPage: React.FC = () => {
                   </div>
                 </div>
               </>
-            ) : (
+            ) : view === 'review' ? (
               <FinancialReview />
+            ) : (
+              <ReportsPage />
             )}
           </>
         )}
