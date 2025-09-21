@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useMemo } from 'react';
 import type { Transaction } from '../types';
 import { TransactionType } from '../types';
 import { useTransactions } from '../context/TransactionContext';
+import { useSettings } from '../context/SettingsContext';
 import { EXPENSE_CATEGORIES } from '../constants';
 
 interface TransactionModalProps {
@@ -19,6 +20,11 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, tr
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   const { addTransaction, updateTransaction } = useTransactions();
+  const { customCategories } = useSettings();
+
+  const allCategories = useMemo(() => {
+    return [...new Set([...EXPENSE_CATEGORIES, ...customCategories])].sort();
+  }, [customCategories]);
 
   useEffect(() => {
     if (transaction) {
@@ -32,10 +38,10 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, tr
       setType(TransactionType.EXPENSE);
       setAmount('');
       setDescription('');
-      setCategory(EXPENSE_CATEGORIES[0]);
+      setCategory(allCategories[0] || '');
       setDate(new Date().toISOString().split('T')[0]);
     }
-  }, [transaction, isOpen]);
+  }, [transaction, isOpen, allCategories]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -81,7 +87,7 @@ const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, tr
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">Category</label>
               <select value={category} onChange={e => setCategory(e.target.value)} className="w-full bg-gray-700 text-white rounded-md p-2 border border-gray-600 focus:ring-brand-primary focus:border-brand-primary">
-                {EXPENSE_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                {allCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
               </select>
             </div>
           )}
