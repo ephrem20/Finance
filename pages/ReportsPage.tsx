@@ -1,5 +1,7 @@
+
 import React, { useState, useMemo } from 'react';
 import { useTransactions } from '../context/TransactionContext';
+import { useSettings } from '../context/SettingsContext';
 import type { Transaction } from '../types';
 import { TransactionType } from '../types';
 import { EXPENSE_CATEGORIES } from '../constants';
@@ -20,6 +22,12 @@ const ReportsPage: React.FC = () => {
     const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: 'date', direction: 'desc' });
 
     const { transactions } = useTransactions();
+    const { customCategories } = useSettings();
+
+    const allCategories = useMemo(() => {
+        return [...new Set([...EXPENSE_CATEGORIES, ...customCategories])].sort();
+    }, [customCategories]);
+
 
     const handleGenerateReport = () => {
         let filtered = transactions.filter(t => {
@@ -193,7 +201,7 @@ const ReportsPage: React.FC = () => {
                         <label className="text-xs font-semibold text-gray-400">Category</label>
                         <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} disabled={filterType !== TransactionType.EXPENSE} className="w-full bg-gray-700 text-white text-sm rounded-md p-2 border border-gray-600 focus:ring-brand-primary focus:border-brand-primary disabled:opacity-50">
                             <option value="ALL">All</option>
-                            {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                            {allCategories.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
                     </div>
                 </div>
