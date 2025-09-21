@@ -42,7 +42,7 @@ const SettingsPage: React.FC = () => {
                             type="number"
                             value={limitInput}
                             onChange={e => setLimitInput(e.target.value)}
-                            placeholder="e.g., 100000"
+                            placeholder="e.g., 100000Br"
                             className="w-full bg-gray-700 text-white rounded-md p-2 border border-gray-600 focus:ring-brand-primary focus:border-brand-primary"
                         />
                     </div>
